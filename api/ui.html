@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Recommendation Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #020617;
+    color: white;
+}
+
+/* Layout */
+.container {
+    display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    height: 100vh;
+    background: #0f172a;
+    padding: 20px;
+}
+
+.sidebar h2 {
+    color: #38bdf8;
+}
+
+.sidebar p {
+    color: #94a3b8;
+}
+
+/* Main */
+.main {
+    flex: 1;
+    padding: 30px;
+}
+
+/* Top bar */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+input {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+}
+
+button {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(90deg, #38bdf8, #6366f1);
+    color: white;
+    cursor: pointer;
+}
+
+/* Cards */
+.cards {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.card {
+    flex: 1;
+    background: rgba(30, 41, 59, 0.6);
+    padding: 20px;
+    border-radius: 12px;
+}
+
+/* Recommendations */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+.rec-card {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+/* Loader */
+.loader {
+    margin-top: 20px;
+    color: #38bdf8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>🚀 AI Reco</h2>
+        <p>Smart Recommendation System</p>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <div>
+                <input id="userId" placeholder="Enter User ID">
+                <button onclick="loadData()">Get Recommendations</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="cards">
+            <div class="card">
+                <h3>Total Users</h3>
+                <p id="users">-</p>
+            </div>
+            <div class="card">
+                <h3>Interactions</h3>
+                <p id="interactions">-</p>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <canvas id="chart" height="100"></canvas>
+
+        <!-- Status -->
+        <div id="status"></div>
+
+        <!-- Recommendations -->
+        <h2>Recommendations</h2>
+        <div class="grid" id="results"></div>
+
+    </div>
+</div>
+
+<script>
+let chart;
+
+async function loadMetrics() {
+    const res = await fetch("/metrics");
+    const data = await res.json();
+
+    document.getElementById("users").innerText = data.total_users;
+    document.getElementById("interactions").innerText = data.total_interactions;
+}
+
+async function loadData() {
+    const userId = document.getElementById("userId").value;
+    const results = document.getElementById("results");
+    const status = document.getElementById("status");
+
+    results.innerHTML = "";
+    status.innerHTML = "<div class='loader'>Loading...</div>";
+
+    try {
+        const res = await fetch(`/recommend/${userId}`);
+        if (!res.ok) throw new Error("User not found");
+
+        const data = await res.json();
+
+        status.innerHTML = "";
+
+        let labels = [];
+        let scores = [];
+
+        data.recommendations.forEach(r => {
+            labels.push("Item " + r.item);
+            scores.push(r.score);
+
+            results.innerHTML += `
+                <div class="rec-card">
+                    <h3>Item ${r.item}</h3>
+                    <p>Score: ${r.score.toFixed(2)}</p>
+                    <p>Reason: ${r.reason}</p>
+                </div>
+            `;
+        });
+
+        drawChart(labels, scores);
+
+    } catch (e) {
+        status.innerHTML = `<p style="color:red">${e.message}</p>`;
+    }
+}
+
+function drawChart(labels, data) {
+    if (chart) chart.destroy();
+
+    const ctx = document.getElementById("chart").getContext("2d");
+
+    chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Recommendation Score",
+                data: data
+            }]
+        }
+    });
+}
+
+loadMetrics();
+</script>
+
+</body>
+</html>
