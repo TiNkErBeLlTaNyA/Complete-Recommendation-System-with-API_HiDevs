@@ -88,13 +88,13 @@ Users interact with content through interactions
 }
 
 * For a new user:
-* 
+  
 {
   "user_id": 999,
   "results": [...],
   "note": "cold start user"
 }
-```
+---
 
 * **POST /feedback** → Record feedback
 * **GET /metrics** → System statistics
