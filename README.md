@@ -73,6 +73,7 @@ Users interact with content through interactions
 * **GET /recommend/{user_id}** → Get recommendations
 
 - Example response: For a user
+  ```bash
 {
   "user_id": 1,
   "results": [
@@ -84,12 +85,15 @@ Users interact with content through interactions
   ],
   "note": "existing user"
 }
+```
 For a new user:
+```bash
 {
   "user_id": 999,
   "results": [...],
   "note": "cold start user"
 }
+```
 
 * **POST /feedback** → Record feedback
 * **GET /metrics** → System statistics
