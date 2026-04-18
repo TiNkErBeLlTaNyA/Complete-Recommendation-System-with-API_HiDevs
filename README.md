@@ -167,7 +167,7 @@ The project includes a simple dashboard:
 
 ##  Demo Video
 
-[▶Watch Demo Video](https://youtu.be/YOUR_VIDEO_ID)
+[▶Watch Demo Video](https://youtu.be/IYsLtKi9Z3k?si=_uh-2BsdzQmZBLZP)
 
 ---
 
